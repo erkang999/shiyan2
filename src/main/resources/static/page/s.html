@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    .el-table .warning-row {
+      background: oldlace;
+    }
+
+    .el-table .success-row {
+      background: #f0f9eb;
+    }
+  </style>
+
+</head>
+<body>
+<div id ="app">
+
+<!--  <div align="center" style="position:relative;top:10px">-->
+<!--    <button>this's a button</button>-->
+<!--  </div>-->
+<!--  <input id="Mybutton" style="margin-left:500px;margin-top:500px"-->
+<!--         type=button color="red" value="联系我们" οnclick="window.open('sub1.html')">-->
+
+  <div align="center">
+    <el-row>
+      <!--    <el-button> </el-button>-->
+      <el-button type="primary" plain  @click="dialogFormVisible = true"  >新增课程</el-button>
+    </el-row>
+  </div>
+
+
+<!--新增课程的对话框表单-->
+  <el-dialog title="新增课程"
+             :visible.sync="dialogFormVisible">
+    <el-form :model="s_studentAdd">
+
+
+      <el-form-item label="课程名称" :label-width="formLabelWidth">
+        <el-input v-model="s_studentAdd.name" autocomplete="off"></el-input>
+      </el-form-item>
+
+          <el-form-item label="课程学时" :label-width="formLabelWidth">
+        <el-input v-model="s_studentAdd.hours" autocomplete="off"></el-input>
+      </el-form-item>
+
+
+      <el-form-item label="课程所属学院" :label-width="formLabelWidth">
+        <el-select v-model="s_studentAdd.sid">
+          <el-option label="计算机学院" value="1"></el-option>
+          <el-option label="外国语学院" value="2"></el-option>
+        </el-select>
+      </el-form-item>
+
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogFormVisible = false">Cancel</el-button>
+    <el-button type="primary" @click="add">Confirm</el-button>
+  </span>
+  </el-dialog>
+
+
+  <!--修改课程的对话框表单-->
+  <el-dialog title="修改课程"
+             :visible.sync="dialogUpdateVisible">
+    <el-form :model="s_student">
+
+
+      <el-form-item label="课程名称" :label-width="formLabelWidth">
+        <el-input v-model="s_student.name" autocomplete="off"></el-input>
+      </el-form-item>
+
+      <el-form-item label="课程学时" :label-width="formLabelWidth">
+        <el-input v-model="s_student.hours" autocomplete="off"></el-input>
+      </el-form-item>
+
+
+      <el-form-item label="课程所属学院" :label-width="formLabelWidth">
+        <el-select v-model="s_student.sid">
+          <el-option label="计算机学院" value="1"></el-option>
+          <el-option label="外国语学院" value="2"></el-option>
+        </el-select>
+      </el-form-item>
+
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogUpdateVisible = false">Cancel</el-button>
+    <el-button type="primary" @click="update">Confirm</el-button>
+  </span>
+  </el-dialog>
+
+
+  <template>
+    <el-table
+        :data="tableData"
+        style="width: 100%"
+        :row-class-name="tableRowClassName">
+      <el-table-column
+          prop="name"
+          label="课程名称"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="hours"
+          label="课程学时"
+          width="180">
+      </el-table-column>
+      <el-table-column
+          prop="sid"
+          label="课程所属学院id">
+      </el-table-column>
+      <el-table-column
+          label="Operations">
+        <template slot-scope="scope">
+          <el-button
+              size="mini"
+              @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+          <el-button
+              size="mini"
+              type="danger"
+              @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </template>
+
+</div>
+
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="../js/axios-0.18.0.js"></script>
+
+<script>
+// in component
+new Vue(
+    {
+  el: "#app",
+      mounted() {
+  this.selectAll();
+      },
+
+      methods: {
+    add()
+    {
+      var _this = this;
+      axios(
+          {
+            method:"post",
+            url:"http://localhost:8080/s_student",
+            data:_this.s_studentAdd
+          }).then(function(response) {
+
+           console.log(_this.s_studentAdd);
+           console.log(response.data.msg);
+            if(response.data.msg=="success"){
+                 _this.dialogFormVisible= false;
+                 _this.selectAll();
+                 _this.$message({
+                   message:"恭喜你，添加成功",
+                   type:'success'
+                 })
+            }
+            else{
+              _this.$message({
+                message:"添加失败，课程名称已存在,请添加准确信息",
+                type:'error'
+              })
+
+              }
+      })
+    },
+
+        update()
+        {
+
+          axios(
+              {
+                method:"put",
+                url:"http://localhost:8080/s_student",
+                data:this.s_student
+              }
+          ).then((response)=>
+          {
+            //在Vue中this始终指向Vue，但axios中this为undefined，
+//若需要赋值给变量用以渲染数据，可以通过=>函数，这时this为Vue
+            if(response.data.msg=="success")
+            {
+              // console.log(response.data.msg);
+
+              this.dialogUpdateVisible=false;
+              // console.log(this.dialogUpdateVisible);
+              this.selectAll();
+
+              this.$message(
+                  {
+                    message:"恭喜你，修改成功",
+                    type:'success'
+                  }
+              )
+            }else {
+              this.$message({
+                message:"修改失败，课程名已经存在",
+                type:'error'
+              })
+            }
+
+          })
+        },
+
+
+        tableRowClassName({row, rowIndex}) {
+          if (rowIndex === 1) {
+            return 'warning-row';
+          } else if (rowIndex === 3) {
+            return 'success-row';
+          }
+          return '';
+        },
+          handleEdit(index, row) {
+            this.dialogUpdateVisible=true;
+            // console.log(index, row);
+            // console.log(row);
+            // console.log(JSON.stringify(row));
+            // console.log(typeof JSON.stringify(row));string
+           // console.log(JSON.parse(JSON.stringify(row)));
+           this.s_student=JSON.parse(JSON.stringify(row));
+
+            // console.log(dialogUpdateVisible);
+            // warn]: Error in v-on handler: "ReferenceError: dialogUpdateVisible is not defined"
+//经过检查原来是因为在方法中如果想要使用实例上面的变量，必须要使用this来指向这个变量，
+            console.log(this.dialogUpdateVisible);
+          },
+
+          handleDelete(index, row) {
+
+          this.s_student=JSON.parse(JSON.stringify(row));
+
+            this.$confirm('是否确认删除该课程?', '提示', {
+              confirmButtonText: '确认删除',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              // console.log("jinlail");
+              axios({
+                method:"delete",
+                url:"http://localhost:8080/s_student/"+this.s_student.id
+              }).then((resp) => {
+                // console.log(resp);
+                if(resp.data.msg=="success")
+                {
+                  this.selectAll();
+                  this.$message({
+                    type: 'success',
+                    message: '课程已删除'
+                  });
+                }
+              })
+            }).catch(() => {
+              // console.log(this.s_student.id);
+              this.$message({
+                type: 'info',
+                message: '操作已取消'
+              });
+            });
+          },
+
+
+        selectAll()
+        {
+          var _this=this; // 提升生命周期
+
+          axios(
+              {
+                method:"get",
+                // url:"http://localhost:8080/s_student/"
+                url:"http://localhost:8080/s_student/"
+              }
+          ).then(function (resp){
+            /*回调函数*/
+            // console.log(resp.data);
+            _this.tableData=resp.data.data;
+          })
+        },
+
+      },
+      data() {
+        return {
+          /*表单数据*/
+          tableData: [{
+            id:'',
+            hours: 88,
+            name: 'java入门',
+            sid: 1
+          },
+            {
+              id:'',
+              hours: 88,
+              name: 'python入门',
+              sid: 1
+            }
+          ],
+          /*对象*/
+          s_student: {
+            id:'',
+          hours: '',
+          name: '',
+          sid: ''
+        },
+          s_studentAdd:{
+            id:'',
+            hours: '',
+            name: '',
+            sid: ''
+          },
+
+          formLabelWidth: '120px',
+
+          // 对话框
+          dialogFormVisible:false,
+          dialogUpdateVisible:false
+        }
+      }
+    })
+</script>
+
+</body>
+</html>
