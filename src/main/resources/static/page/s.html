@@ -11,6 +11,32 @@
     .el-table .success-row {
       background: #f0f9eb;
     }
+
+    .avatar-uploader .el-upload {
+      border: 1px dashed #d9d9d9;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+      border-color: #409EFF;
+    }
+    .avatar-uploader-icon {
+      font-size: 28px;
+      color: #8c939d;
+      width: 100px;
+      height: 100px;
+      line-height: 50px;
+      text-align: center;
+    }
+    .avatar {
+      width: 178px;
+      height: 178px;
+      display: block;
+    }
+
+
   </style>
 
 </head>
@@ -26,8 +52,13 @@
   <div align="center">
     <el-row>
       <!--    <el-button> </el-button>-->
-      <el-button type="primary" plain  @click="dialogFormVisible = true"  >新增课程</el-button>
+
+         <el-button type="primary" plain  @click="dialogFormVisible = true" >新增课程</el-button>
+      &nbsp; &nbsp;&nbsp;  <span>用户： {{username}}</span>&nbsp;&nbsp;
+      <el-button  align="right"  type="danger" @click="exit">退出</el-button>
+
     </el-row>
+
   </div>
 
 
@@ -44,6 +75,48 @@
           <el-form-item label="课程学时" :label-width="formLabelWidth">
         <el-input v-model="s_studentAdd.hours" autocomplete="off"></el-input>
       </el-form-item>
+
+      <el-form-item label="课程封面" :label-width="formLabelWidth" >
+
+        <el-select v-model="s_studentAdd.imagUrl" placeholder="不选择则使用默认封面" >
+        <el-option label="默认封面" :value="defaultURL" selected ></el-option>
+          <el-option v-for="item in optionalURLs" :label="item"  :value="item" >{{item}}</el-option>
+
+<!--          <el-option label="计算机学院" value="../images/bomb1.jpg"></el-option>-->
+<!--          <el-option label="外国语学院" value="../images/bomb2.jpg"></el-option>-->
+<!--          <el-option label="外学院" value="../images/dog.jpg"></el-option>-->
+          <!--          <el-option lable-->
+        </el-select>
+
+        <table>
+          <tr>
+            <td align="left">
+              <el-image
+                  style="width: 100px; height: 100px"
+                  :src="s_studentAdd.imagUrl"
+                  :fit="fits"></el-image>
+            </td>
+
+            <!--本地上传-->
+            <td align="right">
+              <p>本地上传</p>
+              <el-upload
+                  class="avatar-uploader"
+                  action="https://jsonplaceholder.typicode.com/posts/"
+                  :show-file-list="false"
+                  :on-success="handleAvatarSuccess"
+                  :before-upload="beforeAvatarUpload">
+                <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </td>
+          </tr>
+        </table>
+
+      </el-form-item>
+
+
+
 
 
       <el-form-item label="课程所属学院" :label-width="formLabelWidth">
@@ -75,11 +148,52 @@
         <el-input v-model="s_student.hours" autocomplete="off"></el-input>
       </el-form-item>
 
+      <el-form-item label="课程封面" :label-width="formLabelWidth">
+        <el-select v-model="s_student.imagUrl" placeholder="使用默认封面">
+          <el-option v-for="item in optionalURLs" :label="item"  :value="item">{{item}}</el-option>
+
+          <!--          <el-option label="计算机学院" value="../images/bomb1.jpg"></el-option>-->
+          <!--          <el-option label="外国语学院" value="../images/bomb2.jpg"></el-option>-->
+          <!--          <el-option label="外学院" value="../images/dog.jpg"></el-option>-->
+          <!--          <el-option lable-->
+        </el-select>
+
+        <table>
+          <tr>
+        <td align="left">
+          <el-image
+              style="width: 100px; height: 100px"
+              :src="s_student.imagUrl"
+              :fit="fits"></el-image>
+        </td>
+
+        <!--本地上传-->
+        <td align="right">
+          <p>本地上传</p>
+          <el-upload
+              class="avatar-uploader"
+              action="https://jsonplaceholder.typicode.com/posts/"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload">
+            <img v-if="imageUrl" :src="imageUrl" class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
+        </td>
+          </tr>
+        </table>
+      </el-form-item>
+
+
+
+
+
 
       <el-form-item label="课程所属学院" :label-width="formLabelWidth">
         <el-select v-model="s_student.sid">
           <el-option label="计算机学院" value="1"></el-option>
           <el-option label="外国语学院" value="2"></el-option>
+<!--          <el-option lable-->
         </el-select>
       </el-form-item>
 
@@ -110,6 +224,18 @@
           prop="sid"
           label="课程所属学院id">
       </el-table-column>
+
+      <el-table-column
+          label="课程封面">
+        <template slot-scope="s">
+      <el-image
+          style="width: 70px; height: 50px"
+          :src="s.row.imagUrl"
+          :fit="fits"></el-image>
+        </template>
+      </el-table-column>
+
+
       <el-table-column
           label="Operations">
         <template slot-scope="scope">
@@ -125,6 +251,20 @@
     </el-table>
   </template>
 
+
+  <!--分页工具条-->
+  <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 15, 20]"
+      :page-size="5"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="totalCount">
+
+
+  </el-pagination>
+
 </div>
 
 <script src="../js/vue.js"></script>
@@ -138,13 +278,94 @@ new Vue(
     {
   el: "#app",
       mounted() {
+
+        // axios.interceptors.response.use(
+        //     function (response) {
+        //       // 对响应数据做点什么
+        //       console.log(response.status);
+        //       return response
+        //     },
+        //     function (error) {
+        //       // 对响应错误做点什么
+        //       // 如果是401错误，说明token没有 或 过期，就跳转登录页
+        //       if( error.response.status === 402 ){
+        //         alert('请先登录')
+        //         window.location.href = '/page/login04.html'
+        //       }else{//其他的错误，就弹出提示框
+        //         Toast.fail(error.response.data.message)
+        //       }
+        //       return Promise.reject(error)
+        //     }
+        // )
+        
+   this.username= this.getUrlParms("username");
+   console.log(this.username);
   this.selectAll();
+  // this.urls.contain
       },
 
       methods: {
+
+        //分页
+        handleSizeChange(val) {
+          // 重新设置每页显示的条数
+          this.pageSize  = val;
+          this.selectAll();
+        },
+        handleCurrentChange(val) {
+          // 重新设置当前页码
+          this.currentPage  = val;
+          this.selectAll();
+        },
+
+
+    exit()
+    {
+      window.location.href="login04.html";
+    },
+        //获取地址栏参数，name:参数名称
+        getUrlParms (name) {
+          let url = window.location.href;//获取请求进来的完整url
+          let tstr = url.substring(url.indexOf('?') + 1).split('&');//先截取url的?后面的参数部分，在根据&分割成参数数组
+          let result = {};
+          tstr.forEach((item) => {
+            let res = item.split('=');//res为type,my-component1.vue。  res[0]为type，res[1为]my-component1.vue
+            result[res[0]] = res[1];//构造成键值对形式 res[0]为键，res[1]为值 例：type: "my-component1.vue"
+          })
+          return result[name];//通过键取值
+        },
+
+        handleAvatarSuccess(res, file) {
+          this.imageUrl = URL.createObjectURL(file.raw);
+          this.s_student.imagUrl=this.imageUrl;
+          this.s_studentAdd.imagUrl=this.imageUrl;
+        },
+        beforeAvatarUpload(file) {
+          const isJPG = file.type === 'image/jpeg';
+          const isLt2M = file.size / 1024 / 1024 < 2;
+
+          if (!isJPG) {
+            this.$message.error('上传头像图片只能是 JPG 格式!');
+          }
+          if (!isLt2M) {
+            this.$message.error('上传头像图片大小不能超过 2MB!');
+          }
+          return isJPG && isLt2M;
+        },
+
     add()
     {
       var _this = this;
+      // 默认封面
+      if(_this.s_studentAdd.imagUrl=='')
+      {
+        _this.s_studentAdd.imagUrl=_this.defaultURL;
+      }
+      if(this.urls.includes(this.imageUrl)==false)
+      {
+        this.urls.push(this.imageUrl);
+      }
+
       axios(
           {
             method:"post",
@@ -156,6 +377,9 @@ new Vue(
            console.log(response.data.msg);
             if(response.data.msg=="success"){
                  _this.dialogFormVisible= false;
+
+
+                    _this.s_studentAdd=_this.s_studentNull;//清空
                  _this.selectAll();
                  _this.$message({
                    message:"恭喜你，添加成功",
@@ -172,8 +396,18 @@ new Vue(
       })
     },
 
-        update()
+
+update()
         {
+          // 默认封面
+          if(this.s_studentAdd.imagUrl=='')
+          {
+            this.s_studentAdd.imagUrl=this.defaultURL;
+          }
+          if(this.urls.includes(this.imageUrl)==false)
+          {
+            this.urls.push(this.imageUrl);
+          }
 
           axios(
               {
@@ -266,39 +500,93 @@ new Vue(
             });
           },
 
-
         selectAll()
         {
           var _this=this; // 提升生命周期
-
+          console.log(_this.currentPage)
           axios(
               {
                 method:"get",
-                // url:"http://localhost:8080/s_student/"
                 url:"http://localhost:8080/s_student/"
+                // url:"http://localhost:8080/s_student/"
+                // url:"http://localhost:8080/s_student/selectBypage?currentPage=1&pageSize=3",
+                // url:"http://localhost:8080/s_student/selectByPage?currentPage="+_this.currentPage+"&pageSize="+_this.pageSize,
               }
           ).then(function (resp){
             /*回调函数*/
-            // console.log(resp.data);
+            console.log(resp.data);
+            //设置总记录数
             _this.tableData=resp.data.data;
+            // console.log(parseInt(resp.data.mst));
+            // _this.totalCount=parseInt(resp.data.msg);
+
+            // 调整可选封面数组，防止选相同的封面。
+            // console.log(_this.tableData);
+            // console.log(_this.urls);
+
+         //    for (let i = 0; i <_this.tableData.length ; i++) {
+         //
+         //      console.log(_this.urls.includes(_this.tableData[i].imagUrl)==false);
+         //      // if(_this.urls.includes(_this.tableData[i].imagUrl)==false){
+         //      //   console.log(_this.urls.includes(_this.tableData[i].imagUrl)==false);
+         //      // }
+         //      console.log(_this.tableData[i].imagUrl);//
+         //      if(_this.urls.includes(_this.tableData[i].imagUrl))
+         //      {
+         // // console.log(_this.urls.includes(_this.tableData[i].imagUrl)==false)
+         //        // this.optionalURLs.push(this.tableData[i].imagUrl);
+         //        _this.optionalURLs.push(_this.tableData[i].imagUrl);
+         //      }else {
+         //
+         //      }
+         //    }//  ../
+
+            let flag = false;
+
+            // 先理清思路！！！！！！！！！！！！！！！！！
+            for (let i = 0; i <_this.urls.length ; i++) {
+              flag=false;
+              for (let j = 0; j <_this.tableData.length ; j++) {
+                if(_this.urls[i]==_this.tableData[j].imagUrl)
+                {
+                  flag=true;
+                  break;
+                }
+              }
+              //如果匹配不到，就加入optionalURLs
+              if(flag==false)
+              {
+                _this.optionalURLs.push(_this.urls[i]);
+              }
+
+            }
+            console.log(_this.optionalURLs);
           })
         },
 
       },
       data() {
         return {
+          // 每页显示的条数
+          pageSize:5,
+          // 总记录数
+          totalCount:100,
+          // 当前页码
+          currentPage: 1,
           /*表单数据*/
           tableData: [{
             id:'',
             hours: 88,
             name: 'java入门',
-            sid: 1
+            sid: 1,
+            imagUrl:'../images/bomb1.jpg'
           },
             {
               id:'',
               hours: 88,
               name: 'python入门',
-              sid: 1
+              sid: 1,
+              imagUrl:'../images/bomb1.jpg'
             }
           ],
           /*对象*/
@@ -306,20 +594,56 @@ new Vue(
             id:'',
           hours: '',
           name: '',
-          sid: ''
+          sid: '',
+            imagUrl:''
         },
           s_studentAdd:{
             id:'',
             hours: '',
             name: '',
-            sid: ''
+            imagUrl:''
+          },
+          s_studentNull:{
+            id:'',
+            hours: '',
+            name: '',
+            imagUrl:''
           },
 
           formLabelWidth: '120px',
 
           // 对话框
           dialogFormVisible:false,
-          dialogUpdateVisible:false
+          dialogUpdateVisible:false,
+          // 图片封面
+          // fits: ['fill', 'contain', 'cover', 'none', 'scale-down'],
+          fits:'cover',
+          urls:[
+           "../images/bom3.jpg",
+           "../images/bom3 - 副本.jpg",
+           "../images/bomb1.jpg",
+           "../images/bomb2.jpg",
+           "../images/dog.jpg",
+           "../images/hh.jpg",
+           "../images/b1.jpeg",
+            "../images/cl.jpg",
+            "../images/b4.jpg",
+            "../images/cx.jpg",
+            "../images/j.jpg",
+            "../images/kl.jpg",
+            "../images/kl2.jpg",
+            "../images/lw.jpg",
+            "../images/lw2.jpg",
+            "../images/wc.jpg",
+            // "../images/ikun.jpg"
+          ],
+          // 可选封面数据，防止选相同的封面。
+          optionalURLs: [],
+          url: '../images/b1.jpeg',
+          // 默认封面
+          defaultURL: '../images/ikun.jpg',
+          imageUrl: '',
+          username: ''
         }
       }
     })

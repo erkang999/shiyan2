@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+
+    .login{
+      margin-top: 200px;
+    }
+    .input_style{
+      width: 200px;
+      margin-bottom: 10px;
+    }
+    .login_style{
+      width: 200px;
+    }
+    .demo-ruleForm{
+      width: 500px;
+      height: 500px;
+      border-style: solid;
+      align-items: center;
+      margin-right: auto;
+      margin-left: auto;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+    .table{
+      margin-right: 50px;
+      margin-left: auto;
+      margin-top: 100px;
+      margin-bottom: auto;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+<div id="login">
+
+  <el-form  :model="ruleForm" status-icon :rules="rules" ref="ruleForm"  label-width="100px" class="demo-ruleForm">
+    <div class="table">
+    <el-form-item label="用户名称" prop="pass">
+      <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="密码" prop="checkPass">
+      <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+    </el-form-item>
+    <el-form-item label="验证码" prop="age">
+      <el-input v-model.number="ruleForm.age"></el-input>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
+      <el-button @click="resetForm('ruleForm')">重置</el-button>
+    </el-form-item>
+      </div>
+  </el-form>
+
+</div>
+<script src="../js/vue.js"></script>
+<script src="../element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+<script src="../js/axios-0.18.0.js"></script>
+
+<script>
+  new Vue ({
+    el: "#login",
+    data() {
+      var checkAge = (rule, value, callback) => {
+        if (!value) {
+          return callback(new Error('年龄不能为空'));
+        }
+        setTimeout(() => {
+          if (!Number.isInteger(value)) {
+            callback(new Error('请输入数字值'));
+          } else {
+            callback();
+          }
+        }, 1000);
+      };
+      var validatePass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'));
+        } else {
+          if (this.ruleForm.checkPass !== '') {
+            this.$refs.ruleForm.validateField('checkPass');
+          }
+          callback();
+        }
+      };
+      var validatePass2 = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请再次输入密码'));
+        } else if (value !== this.ruleForm.pass) {
+          callback(new Error('两次输入密码不一致!'));
+        } else {
+          callback();
+        }
+      };
+      return {
+        ruleForm: {
+          pass: '',
+          checkPass: '',
+          age: ''
+        },
+        rules: {
+          pass: [
+            { validator: validatePass, trigger: 'blur' }
+          ],
+          checkPass: [
+            { validator: validatePass2, trigger: 'blur' }
+          ],
+          age: [
+            { validator: checkAge, trigger: 'blur' }
+          ]
+        }
+      };
+    },
+    methods: {
+      submitForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            alert('submit!');
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      },
+      resetForm(formName) {
+        this.$refs[formName].resetFields();
+      }
+    }
+  })
+</script>
+
+</body>
+</html>

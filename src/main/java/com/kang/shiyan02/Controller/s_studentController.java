@@ -7,6 +7,7 @@ import com.kang.shiyan02.service.s_studentService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 //
 //@RestController
@@ -66,6 +67,20 @@ public class s_studentController {
         Result result = new Result();
         result.setMsg(s_studentService.deleteById(id));
         return  result;
+    }
+
+    @GetMapping("/selectBypage")
+    public Result selectByPage(HttpServletRequest request) {
+        //1. 接收 当前页码 和 每页展示条数    url?currentPage=1&pageSize=5
+        String _currentPage = request.getParameter("currentPage");
+        String _pageSize = request.getParameter("pageSize");
+
+        int currentPage = Integer.parseInt(_currentPage);
+        int pageSize = Integer.parseInt(_pageSize);
+        System.out.println(currentPage+" "+pageSize);
+        Result result = s_studentService.selectByPage(currentPage,pageSize);
+
+        return result;
     }
 
 }

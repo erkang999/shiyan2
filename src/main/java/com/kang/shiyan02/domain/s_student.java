@@ -10,4 +10,5 @@ public class s_student {
  private String  name ;
  private Integer  hours ;
  private Integer  sid ;
+ private String imagUrl;
 }
